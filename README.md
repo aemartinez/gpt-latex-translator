@@ -1,27 +1,33 @@
 # gpt-latex-translator
-A tool to translate LaTeX documents using OpenAI's GPT-3 API.
+A tool to translate LaTeX documents using OpenAI's ChatGPT API.
 
-The tool is intented for translating academic texts written as LaTeX projects. It takes the directory of the project and traslate every .tex file from English to Spanish (customizable). Commented out lines will not be translated.
+gpt-latex-translator is a tool that uses OpenAI's ChatGPT API to translate LaTeX documents (by default, from English to Spanish). This tool is intended for academic texts written in LaTeX projects.
 
 # Installation 
-Install the package with the following command
+Install the package with the following command:
 ```
 pip install .
 ```
-Now you should be able to run `gpt-translate` command line tool.
+After installation, you should be able to run the `gpt-translate` command-line tool.
 
 # Usage
 ### OpenAI API
-The tool uses the model [gpt-3.5-turbo](https://platform.openai.com/docs/guides/chat). You'll need to provide your OpenAI API key through the environment variable `OPENAI_API_KEY`. For example, you could call the tool using:
+The tool uses the [gpt-3.5-turbo](https://platform.openai.com/docs/guides/chat) model from OpenAI's API. You'll need to provide your OpenAI API key through the `OPENAI_API_KEY` environment variable. For example, you could call the tool using:
 
 ```OPENAI_API_KEY="your-key" gpt-translate args```
 
-### Command line tool
+### Command-Line Tool
+
+The `gpt-translate` command-line tool has the following options:
+
 ```
 gpt-translate [-h] [-s] [-v] [--dry-run] [--source-language source_language]
               [--target-language target_language]
               path
 ```
+
+The `gpt-translate` command-line tool allows you to translate all corresponding `.tex` files from `source_language` to `target_language`, ignoring commented-out lines. It also creates a backup of each file that is translated.
+
 
 ### arguments/options:
 - `path`: the path of the directory or file to translate
@@ -32,9 +38,9 @@ gpt-translate [-h] [-s] [-v] [--dry-run] [--source-language source_language]
 - `--source-language source_language`: the name of the source language (default: English)
 - `--target-language target_language`: the name of the target language (default: Spanish)
 
-`--dry-run` is specially helpful to perform a cost estimation based on the number of tokens (see https://openai.com/pricing). Remember that both input and output tokens count for pricing.
+The `--dry-run` option is especially helpful to estimate costs based on the number of tokens (see https://openai.com/pricing). Note that both input and output tokens count towards pricing.
 
 ## Problems and workarounds
 
-- The translation might not behave well with large blocks of LaTeX text where there is a mayority of LaTeX symbols over natural language words. The main example of this is big tables. One way around this is to comment the whole block to avoid this block being translated.
-- From time to time, the translation might remove a closing command such as `\end{example}`. This might be due to the way the tool splits the file into chunks to comply with the token limit imposied by OpenAI's API. Inspecting the compilation output together with the original backup file should help finding this quickly.
+- The translation might not work well with large blocks of LaTeX text where there is a majority of LaTeX symbols over natural language words. An example of this is big tables. One workaround is to comment out the entire block to avoid it being translated.
+- Occasionally, the translation might remove a closing command such as `\end{example}`. This could be due to the way the tool splits the file into chunks to comply with the token limit imposed by OpenAI's API. Inspecting the compilation output together with the original backup file should help solve the issue quickly.
