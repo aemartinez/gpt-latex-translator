@@ -41,7 +41,6 @@ def main():
     parser = argparse.ArgumentParser(description="""Translate .tex files using OpenAI's GPT-3 API.
                                                     Backups of the original files are created with the extension .bak.""")
     parser.add_argument("path", metavar="path", type=str, help="the path of the directory or file to translate")
-    parser.add_argument("-s", "--single", action="store_true", help="treat path as a single file")
     parser.add_argument("-v", "--verbose", action="store_true", help="print verbose output")
     parser.add_argument("--dry-run", 
                         action="store_true", 
@@ -52,7 +51,13 @@ def main():
                         type=str, default="Spanish", help="the name of the target language (default: Spanish)")
     args = parser.parse_args()
 
-    if args.single:
+    # Check if the path exists
+    if not os.path.exists(args.path):
+        print(f"Path '{args.path}' does not exist.")
+        return
+    
+    # Check if the path is a file or a directory
+    if os.path.isfile(args.path):
         tex_files = [args.path]
     else:
         tex_files = collect_tex_files(args.path)
@@ -61,6 +66,11 @@ def main():
         translator = GPTTranslator(verbose=args.verbose)
         dry_run(tex_files, translator)
     else:
+        # Check if the API key is set
+        if not "OPENAI_API_KEY" in os.environ:
+            print("The environment variable OPENAI_API_KEY is not set.")
+            return
+        
         openai_api_key = os.environ["OPENAI_API_KEY"]
         translator = GPTTranslator(openai_api_key=openai_api_key, 
                                    verbose=args.verbose, 
