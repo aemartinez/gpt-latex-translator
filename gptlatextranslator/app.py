@@ -2,7 +2,7 @@ import argparse
 import os
 import shutil
 from typing import List
-from gptlatextranslator.GPTTranslator import GPTTranslator
+from gptlatextranslator.GPTTranslator import GPTTranslator, MODELS
 
 def collect_tex_files(dir_path: str) -> List[str]:
     tex_files = []
@@ -49,6 +49,12 @@ def main():
                         type=str, default="English", help="the name of the source language (default: English)")
     parser.add_argument("--target-language", metavar="target_language",
                         type=str, default="Spanish", help="the name of the target language (default: Spanish)")
+    parser.add_argument("-m", "--model", metavar="model",
+                        type=str, default="gpt-3.5-turbo-16k", help="the name of the OpenAI model to use for translation.",
+                        choices=MODELS)
+    parser.add_argument("--ignore-comments",
+                        action="store_true",
+                        help="do not translate Latex comments")
     args = parser.parse_args()
 
     # Check if the path exists
@@ -63,7 +69,9 @@ def main():
         tex_files = collect_tex_files(args.path)
     
     if args.dry_run:
-        translator = GPTTranslator(verbose=args.verbose)
+        translator = GPTTranslator(verbose=args.verbose,
+                                   model_name=args.model,
+                                   ignore_commented_blocks=args.ignore_comments)
         dry_run(tex_files, translator)
     else:
         # Check if the API key is set
@@ -72,8 +80,10 @@ def main():
             return
         
         openai_api_key = os.environ["OPENAI_API_KEY"]
-        translator = GPTTranslator(openai_api_key=openai_api_key, 
-                                   verbose=args.verbose, 
+        translator = GPTTranslator(openai_api_key=openai_api_key,
+                                   verbose=args.verbose,
+                                   ignore_commented_blocks=args.ignore_comments,
+                                   model_name=args.model,
                                    lang_from=args.source_language, 
                                    lang_to=args.target_language)
         real_run(tex_files, translator)

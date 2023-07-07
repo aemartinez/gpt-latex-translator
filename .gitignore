@@ -1,2 +1,4 @@
 venv/
 gptlatextranslator/__pycache__
+build/
+gpt_latex_translator.egg-info/
