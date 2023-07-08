@@ -43,7 +43,7 @@ class GPTTranslator:
 
         self.model_name = model_name
         self.system_context = f"You are a helpful assistant that translates {lang_from} to {lang_to}."
-        self.translation_prompt = f"Translate the following LaTex code from {lang_from} to {lang_to}. "
+        self.translation_prompt = f"Translate the following LaTex text from {lang_from} to {lang_to}. "
 
         if max_input_tokens is None:
             max_input_tokens = get_default_max_input_tokens(model_name)
