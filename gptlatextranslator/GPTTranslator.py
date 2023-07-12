@@ -3,21 +3,65 @@ import tiktoken
 import warnings
 from typing import List
 
+# For more info on available models, see https://platform.openai.com/docs/models/overview
+MODELS = [
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-16k",
+    "gpt-4",
+    "gpt-4-32k"
+  ]
+
+def get_default_max_input_tokens(model_name: str) -> int:
+    """Returns the default maximum number of tokens that can be sent to the model, before running intro troubles."""
+    max_tokens = None
+
+    if model_name == "gpt-3.5-turbo":
+        max_tokens = 4096
+    elif model_name == "gpt-3.5-turbo-16k":
+        max_tokens = 16384
+    elif model_name == "gpt-4":
+        max_tokens = 8192
+    elif model_name == "gpt-4-32k":
+        max_tokens = 32768
+    else:
+        raise ValueError(f"Unknown model name '{model_name}'.")
+
+    # 0.31 is a magic number that allows us enough space to add the system context and the translation prompt, while also taking into account the output of the model.
+    max_input_tokens = int(max_tokens * 0.31)
+    return max_input_tokens
+
 class GPTTranslator:
     """A class for translating LaTex text using OpenAI's API."""
 
     def __init__(self, lang_from:str = "English", 
                  lang_to:str = "Spanish", 
-                 model_name: str = "gpt-3.5-turbo", 
-                 max_input_tokens: int = 1300,
+                 model_name: str = "gpt-3.5-turbo-16k",
                  ignore_commented_blocks: bool = True,
                  verbose: bool = False,
+                 max_input_tokens: int = None,
                  openai_api_key: str = None):
-        
+
         self.model_name = model_name
         self.system_context = f"You are a helpful assistant that translates {lang_from} to {lang_to}."
-        self.translation_prompt = f"Translate the following LaTex text from {lang_from} to {lang_to}:"
-        self.max_text_tokens = max_input_tokens - self._count_tokens(self.translation_prompt) - self._count_tokens(self.system_context)
+        self.translation_prompt = f"Translate the following LaTex text from {lang_from} to {lang_to}. "
+
+        if max_input_tokens is None:
+            max_input_tokens = get_default_max_input_tokens(model_name)
+            if verbose:
+                print(f"Using default max_input_tokens: {max_input_tokens}")
+
+        translation_prompt_tokens = self._count_tokens(self.translation_prompt)
+        if verbose:
+            print(f"Translation prompt tokens: {translation_prompt_tokens}")
+
+        system_context_tokens = self._count_tokens(self.system_context)
+        if verbose:
+            print(f"System context tokens: {system_context_tokens}")
+
+        self.max_text_tokens = max_input_tokens - translation_prompt_tokens - system_context_tokens
+        if verbose:
+            print(f"Max text tokens: {self.max_text_tokens}")
+
         self.ignore_commented_blocks = ignore_commented_blocks
         self.verbose = verbose
         openai.api_key = openai_api_key
