@@ -1,10 +1,10 @@
 # gpt-latex-translator
 A tool to translate LaTeX documents using OpenAI's ChatGPT API.
 
-gpt-latex-translator is a tool that uses OpenAI's ChatGPT API to translate LaTeX documents (by default, from English to Spanish). This tool is intended for academic texts written in LaTeX projects.
+gpt-latex-translator is a tool that uses OpenAI's ChatGPT API to translate LaTeX documents (by default, from English to Spanish). This tool is intended for academic texts written in LaTeX.
 
 # Installation 
-Install the package with the following command:
+Clone the repository and then run the following command from the root directory of the repository:
 ```
 pip install .
 ```
