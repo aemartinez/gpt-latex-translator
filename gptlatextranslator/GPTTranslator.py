@@ -1,7 +1,19 @@
-import openai
+from openai import OpenAI
 import tiktoken
 import warnings
 from typing import List
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+)  # for exponential backoff
+
+client = OpenAI()
+
+# See https://platform.openai.com/docs/guides/rate-limits/error-mitigation?context=tier-free
+@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+def completion_with_backoff(**kwargs):
+    return client.chat.completions.create(**kwargs)
 
 # For more info on available models, see https://platform.openai.com/docs/models/overview
 MODELS = [
@@ -38,8 +50,7 @@ class GPTTranslator:
                  model_name: str = "gpt-3.5-turbo-16k",
                  ignore_commented_blocks: bool = True,
                  verbose: bool = False,
-                 max_input_tokens: int = None,
-                 openai_api_key: str = None):
+                 max_input_tokens: int = None):
 
         self.model_name = model_name
         self.system_context = f"You are a helpful assistant that translates {lang_from} to {lang_to}."
@@ -64,7 +75,6 @@ class GPTTranslator:
 
         self.ignore_commented_blocks = ignore_commented_blocks
         self.verbose = verbose
-        openai.api_key = openai_api_key
 
     def compute_translation_tokens(self, string: str) -> int:
         """Returns the total number of tokens that would be sent to the model."""
@@ -175,7 +185,7 @@ class GPTTranslator:
                 {"role": "system", "content": self.system_context},
                 {"role": "user", "content": self.translation_prompt + " "+ string}
             ]
-        completion = openai.ChatCompletion.create(
+        completion = completion_with_backoff(
             model=self.model_name,
             messages=messages
         )
@@ -193,3 +203,4 @@ class GPTTranslator:
             print("")
 
         return completion.choices[0].message.content
+ 
