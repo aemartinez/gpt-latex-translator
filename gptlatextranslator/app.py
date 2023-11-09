@@ -74,14 +74,7 @@ def main():
                                    ignore_commented_blocks=args.ignore_comments)
         dry_run(tex_files, translator)
     else:
-        # Check if the API key is set
-        if not "OPENAI_API_KEY" in os.environ:
-            print("The environment variable OPENAI_API_KEY is not set.")
-            return
-        
-        openai_api_key = os.environ["OPENAI_API_KEY"]
-        translator = GPTTranslator(openai_api_key=openai_api_key,
-                                   verbose=args.verbose,
+        translator = GPTTranslator(verbose=args.verbose,
                                    ignore_commented_blocks=args.ignore_comments,
                                    model_name=args.model,
                                    lang_from=args.source_language, 
